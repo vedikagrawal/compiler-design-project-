@@ -191,10 +191,21 @@ for nt in grammar:
 slr1_parsing_table, goto_table = generate_slr1_parsing_table(states, transitions, grammar, first, follow)
 
 st.subheader("SLR(1) Parsing Table")
-terminals = sorted({symbol for row in slr1_parsing_table.values() for symbol in row})
-non_terminals = sorted({symbol for row in goto_table.values() for symbol in row})
+terminals = set()
+for lhs, rhs_list in grammar.items():
+    for rhs in rhs_list:
+        for symbol in rhs:
+            if not symbol.isupper() and symbol not in {"ε"}:  # Terminals are lowercase or symbols
+                terminals.add(symbol)
 
-headers = ["State"] + terminals + ["|"] + non_terminals
+# Ensure `$` is included for parsing table (end-of-input marker)
+terminals.add("$")
+
+terminals = sorted(terminals)  # Sort for consistent order
+
+non_terminals = sorted(grammar.keys())  # All LHS symbols are non-terminals
+
+headers = ["State"] + terminals + non_terminals
 table = [[state] + 
          [slr1_parsing_table[state].get(t, "") for t in terminals] + ["|"] + 
          [goto_table[state].get(nt, "") for nt in non_terminals] 

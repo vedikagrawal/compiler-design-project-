@@ -1,5 +1,6 @@
 import streamlit as st
 from tabulate import tabulate
+import pandas as pd
 
 # Function to get grammar input from user
 def get_grammar():
@@ -199,4 +200,5 @@ table = [[state] +
          [goto_table[state].get(nt, "") for nt in non_terminals] 
          for state in slr1_parsing_table.keys()]
 
-st.table(table)  # Properly formatted table in Streamlit
+df = pd.DataFrame(table, columns=headers)
+st.table(df) # Properly formatted table in Streamlit

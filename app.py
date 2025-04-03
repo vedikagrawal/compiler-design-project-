@@ -1,3 +1,4 @@
+Vedika Agrawal, [03-04-2025 15:42]
 import streamlit as st
 from tabulate import tabulate
 import pandas as pd
@@ -14,7 +15,7 @@ def get_grammar():
         if rule and '->' in rule:
             lhs, rhs = rule.split('->')
             lhs = lhs.strip()
-            rhs_productions = [list(prod.strip()) for prod in rhs.split('|')]
+            rhs_productions = [prod.strip().split() for prod in rhs.split('|')]
             grammar[lhs] = grammar.get(lhs, []) + rhs_productions
         elif rule:
             st.sidebar.warning(f"Invalid format in rule {i+1}. Use '->' to separate LHS and RHS.")
@@ -115,6 +116,7 @@ def compute_first(symbol, grammar, first):
 
     return first[symbol]
 
+Vedika Agrawal, [03-04-2025 15:42]
 # Compute FOLLOW sets
 def compute_follow(symbol, grammar, first, follow, start_symbol):
     if symbol in follow:
@@ -190,22 +192,24 @@ for nt in grammar:
 
 slr1_parsing_table, goto_table = generate_slr1_parsing_table(states, transitions, grammar, first, follow)
 
-# Extract terminals (including + and *)
+st.subheader("SLR(1) Parsing Table")
 terminals = set()
 for lhs, rhs_list in grammar.items():
     for rhs in rhs_list:
         for symbol in rhs:
-            if not symbol.isupper() and symbol not in {"ε"} or symbol in {"+", "*"}:
+            if not symbol.isupper() and symbol not in {"ε"}:  # Terminals are lowercase or symbols
                 terminals.add(symbol)
 
+# Ensure $ is included for parsing table (end-of-input marker)
 terminals.add("$")
-terminals = sorted(terminals)  
-non_terminals = sorted(grammar.keys())  
+
+terminals = sorted(terminals)  # Sort for consistent order
+
+non_terminals = sorted(grammar.keys())  # All LHS symbols are non-terminals
 
 # Correct headers list
 headers = ["State"] + terminals + ["|"] + non_terminals
 
-# Build table
 table = [
     [state] + 
     [slr1_parsing_table[state].get(t, "") for t in terminals] + ["|"] + 
@@ -213,5 +217,10 @@ table = [
     for state in slr1_parsing_table.keys()
 ]
 
+# Ensure all rows have the same number of columns as headers
+for row in table:
+    if len(row) != len(headers):
+        st.error(f"Row length mismatch detected! Expected {len(headers)}, got {len(row)}: {row}")
+
 df = pd.DataFrame(table, columns=headers)
-st.write(df.to_markdown())  
+st.table(df)  # Display properly formatted table

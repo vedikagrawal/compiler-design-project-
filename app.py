@@ -190,24 +190,22 @@ for nt in grammar:
 
 slr1_parsing_table, goto_table = generate_slr1_parsing_table(states, transitions, grammar, first, follow)
 
-st.subheader("SLR(1) Parsing Table")
+# Extract terminals (including + and *)
 terminals = set()
 for lhs, rhs_list in grammar.items():
     for rhs in rhs_list:
         for symbol in rhs:
-            if not symbol.isupper() and symbol not in {"ε"}:  # Terminals are lowercase or symbols
+            if not symbol.isupper() and symbol not in {"ε"} or symbol in {"+", "*"}:
                 terminals.add(symbol)
 
-# Ensure `$` is included for parsing table (end-of-input marker)
 terminals.add("$")
-
-terminals = sorted(terminals)  # Sort for consistent order
-
-non_terminals = sorted(grammar.keys())  # All LHS symbols are non-terminals
+terminals = sorted(terminals)  
+non_terminals = sorted(grammar.keys())  
 
 # Correct headers list
 headers = ["State"] + terminals + ["|"] + non_terminals
 
+# Build table
 table = [
     [state] + 
     [slr1_parsing_table[state].get(t, "") for t in terminals] + ["|"] + 
@@ -215,14 +213,5 @@ table = [
     for state in slr1_parsing_table.keys()
 ]
 
-# Ensure all rows have the same number of columns as headers
-for row in table:
-    if len(row) != len(headers):
-        st.error(f"Row length mismatch detected! Expected {len(headers)}, got {len(row)}: {row}")
-
 df = pd.DataFrame(table, columns=headers)
-st.write(df)
-
-st.subheader("SLR(1) Parsing Table")
-st.write(df.to_markdown())  # Ensures correct display of + and *
-
+st.write(df.to_markdown())  

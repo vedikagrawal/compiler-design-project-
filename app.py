@@ -177,18 +177,6 @@ if not grammar:
 augmented_grammar = augment_grammar(grammar)
 
 states, transitions = generate_lr0_items(augmented_grammar)
-st.subheader("LR(0) States")
-
-for idx, state in enumerate(states):
-    st.write(f"**State {idx}:**")
-    state_items = []
-    for lhs, rhs, dot_pos in state:
-        rhs_with_dot = list(rhs)
-        rhs_with_dot.insert(dot_pos, "•")  # Insert dot at the correct position
-        state_items.append(f"{lhs} → {' '.join(rhs_with_dot)}")
-    
-    st.code("\n".join(state_items))
-
 
 first = {}
 follow = {}

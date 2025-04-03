@@ -1,4 +1,3 @@
-Vedika Agrawal, [03-04-2025 15:42]
 import streamlit as st
 from tabulate import tabulate
 import pandas as pd
@@ -116,7 +115,6 @@ def compute_first(symbol, grammar, first):
 
     return first[symbol]
 
-Vedika Agrawal, [03-04-2025 15:42]
 # Compute FOLLOW sets
 def compute_follow(symbol, grammar, first, follow, start_symbol):
     if symbol in follow:

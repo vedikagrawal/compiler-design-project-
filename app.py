@@ -144,28 +144,6 @@ def compute_follow(symbol, grammar, first, follow, start_symbol):
 
     return follow[symbol]
 
-# Generate SLR(1) Parsing Table
-def generate_slr1_parsing_table(states, transitions, grammar, first, follow):
-    parsing_table = {state: {} for state in range(len(states))}
-    goto_table = {state: {} for state in range(len(states))}
-
-    for (state, symbol), next_state in transitions.items():
-        if symbol.isupper():
-            goto_table[state][symbol] = next_state
-        else:
-            parsing_table[state][symbol] = f"S{next_state}"
-
-    for state, items in enumerate(states):
-        for lhs, rhs, dot_pos in items:
-            if dot_pos == len(rhs):
-                if lhs == "S'":
-                    parsing_table[state]['$'] = 'ACC'
-                else:
-                    for terminal in follow[lhs]:
-                        parsing_table[state][terminal] = f"R({lhs} → {' '.join(rhs)})"
-
-    return parsing_table, goto_table
-
 # Streamlit UI
 st.title("SLR(1) Parser with Streamlit")
 
@@ -178,47 +156,27 @@ augmented_grammar = augment_grammar(grammar)
 
 states, transitions = generate_lr0_items(augmented_grammar)
 
-first = {}
-follow = {}
-
-start_symbol = next(iter(grammar))  
-for nt in grammar:
-    compute_first(nt, grammar, first)
-
-for nt in grammar:
-    compute_follow(nt, grammar, first, follow, start_symbol)
-
-slr1_parsing_table, goto_table = generate_slr1_parsing_table(states, transitions, grammar, first, follow)
+st.subheader("LR(0) States")
+for i, state in enumerate(states):
+    st.text(f"State {i}:")
+    for lhs, rhs, dot_pos in state:
+        rhs_with_dot = list(rhs)
+        rhs_with_dot.insert(dot_pos, "•")
+        st.text(f"  {lhs} → {' '.join(rhs_with_dot)}")
+    st.text("------------------")
 
 st.subheader("SLR(1) Parsing Table")
 terminals = set()
 for lhs, rhs_list in grammar.items():
     for rhs in rhs_list:
         for symbol in rhs:
-            if not symbol.isupper() and symbol not in {"ε"}:  # Terminals are lowercase or symbols
+            if not symbol.isupper() and symbol not in {"ε"}:  
                 terminals.add(symbol)
-
-# Ensure $ is included for parsing table (end-of-input marker)
 terminals.add("$")
-
-terminals = sorted(terminals)  # Sort for consistent order
-
-non_terminals = sorted(grammar.keys())  # All LHS symbols are non-terminals
-
-# Correct headers list
+terminals = sorted(terminals)  
+non_terminals = sorted(grammar.keys())  
 headers = ["State"] + terminals + ["|"] + non_terminals
 
-table = [
-    [state] + 
-    [slr1_parsing_table[state].get(t, "") for t in terminals] + ["|"] + 
-    [goto_table[state].get(nt, "") for nt in non_terminals]
-    for state in slr1_parsing_table.keys()
-]
-
-# Ensure all rows have the same number of columns as headers
-for row in table:
-    if len(row) != len(headers):
-        st.error(f"Row length mismatch detected! Expected {len(headers)}, got {len(row)}: {row}")
-
+table = [[state] + [transitions.get((state, t), "") for t in terminals] + ["|"] + [transitions.get((state, nt), "") for nt in non_terminals] for state in range(len(states))]
 df = pd.DataFrame(table, columns=headers)
-st.table(df)  # Display properly formatted table
+st.table(df)

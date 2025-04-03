@@ -205,11 +205,21 @@ terminals = sorted(terminals)  # Sort for consistent order
 
 non_terminals = sorted(grammar.keys())  # All LHS symbols are non-terminals
 
-headers = ["State"] + terminals + non_terminals
-table = [[state] + 
-         [slr1_parsing_table[state].get(t, "") for t in terminals] + ["|"] + 
-         [goto_table[state].get(nt, "") for nt in non_terminals] 
-         for state in slr1_parsing_table.keys()]
+# Correct headers list
+headers = ["State"] + terminals + ["|"] + non_terminals
+
+table = [
+    [state] + 
+    [slr1_parsing_table[state].get(t, "") for t in terminals] + ["|"] + 
+    [goto_table[state].get(nt, "") for nt in non_terminals]
+    for state in slr1_parsing_table.keys()
+]
+
+# Ensure all rows have the same number of columns as headers
+for row in table:
+    if len(row) != len(headers):
+        st.error(f"Row length mismatch detected! Expected {len(headers)}, got {len(row)}: {row}")
 
 df = pd.DataFrame(table, columns=headers)
-st.table(df) # Properly formatted table in Streamlit
+st.table(df)  # Display properly formatted table
+

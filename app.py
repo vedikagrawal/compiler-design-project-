@@ -14,7 +14,7 @@ def get_grammar():
         if rule and '->' in rule:
             lhs, rhs = rule.split('->')
             lhs = lhs.strip()
-            rhs_productions = [prod.strip().split() for prod in rhs.split('|')]
+            rhs_productions = [list(prod.strip()) for prod in rhs.split('|')]
             grammar[lhs] = grammar.get(lhs, []) + rhs_productions
         elif rule:
             st.sidebar.warning(f"Invalid format in rule {i+1}. Use '->' to separate LHS and RHS.")
@@ -221,5 +221,8 @@ for row in table:
         st.error(f"Row length mismatch detected! Expected {len(headers)}, got {len(row)}: {row}")
 
 df = pd.DataFrame(table, columns=headers)
-st.table(df)  # Display properly formatted table
+st.write(df)
+
+st.subheader("SLR(1) Parsing Table")
+st.write(df.to_markdown())  # Ensures correct display of + and *
 

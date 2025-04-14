@@ -34,7 +34,7 @@ This is a Streamlit-based interactive web app for building and visualizing an SL
 
 ### 1. Clone the repository:
 
-git clone https://github.com/Kashp258/Compiler_Design_project.git
+git clone https://github.com/vedikagrawal/compiler-design-project.git
 cd Compiler_Design_project
 
 ### 2. Install dependencies:
